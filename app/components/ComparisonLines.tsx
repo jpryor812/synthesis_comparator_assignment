@@ -67,6 +67,12 @@ export const ComparisonLines: React.FC<ComparisonLinesProps> = ({
     }
   }, [leftStackRef.current, rightStackRef.current]);
 
+  useEffect(() => {
+    // Reset drawn lines and clicked circles when block counts change
+    setDrawnLines([]);
+    setClickedCircles(new Set());
+  }, [leftCount, rightCount]);
+
   // Get container positions
   const leftContainerRect = leftStackRef.current?.getBoundingClientRect() || new DOMRect();
   const rightContainerRect = rightStackRef.current?.getBoundingClientRect() || new DOMRect();
