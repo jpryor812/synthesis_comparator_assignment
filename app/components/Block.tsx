@@ -8,6 +8,7 @@ interface BlockProps {
   onAnimationComplete?: () => void;
   onRemove?: () => void;
   isPopping?: boolean;
+  flashState?: 'none' | 'correct' | 'incorrect';
 }
 
 export const Block: React.FC<BlockProps> = ({ 
@@ -15,7 +16,8 @@ export const Block: React.FC<BlockProps> = ({
     isNew = false, 
     onAnimationComplete,
     onRemove,
-    isPopping = false 
+    isPopping = false,
+    flashState = 'none'
 }) => {
     const [isHolding, setIsHolding] = useState(false);
     const [hasLanded, setHasLanded] = useState(!isNew);
@@ -67,7 +69,12 @@ export const Block: React.FC<BlockProps> = ({
                 y: 0,
                 scale: isPopping ? 2 : isHolding ? 1.1 : 1,
                 rotate: isHolding ? [-1, 1, -1] : 0,
-                x: isHolding ? [-2, 2, -2] : 0
+                x: isHolding ? [-2, 2, -2] : 0,
+                backgroundColor: flashState === 'correct' 
+                    ? ['rgb(14 165 233)', 'rgb(134 239 172)', 'rgb(14 165 233)']
+                    : flashState === 'incorrect'
+                    ? ['rgb(14 165 233)', 'rgb(253 224 71)', 'rgb(14 165 233)']
+                    : 'rgb(14 165 233)'
             }}
             transition={{
                 y: {
@@ -86,6 +93,11 @@ export const Block: React.FC<BlockProps> = ({
                 x: {
                     repeat: isHolding ? Infinity : 0,
                     duration: 0.2
+                },
+                backgroundColor: {
+                    duration: 1,
+                    repeat: flashState !== 'none' ? 1 : 0,
+                    ease: "easeInOut"
                 }
             }}
             onAnimationComplete={() => {
@@ -106,10 +118,12 @@ export const Block: React.FC<BlockProps> = ({
                     }
                 }
             }}
-            className="w-12 h-12 rounded-lg mb-1 bg-gradient-to-br from-sky-300 via-sky-400 to-sky-500 
+            className={`w-12 h-12 rounded-lg mb-1 bg-gradient-to-br from-sky-300 via-sky-400 to-sky-500 
                        shadow-lg border border-sky-400 backdrop-blur-sm
                        flex items-center justify-center cursor-pointer
-                       hover:brightness-110 transition-[filter]"
+                       hover:brightness-110 transition-[filter]
+                       ${flashState === 'correct' ? 'animate-flash-green' : ''}
+                       ${flashState === 'incorrect' ? 'animate-flash-yellow' : ''}`}
         />
     );
 };

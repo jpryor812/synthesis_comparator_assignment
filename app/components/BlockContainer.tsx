@@ -9,9 +9,12 @@ import ControlPanel from './ControlPanel';
 import LineToggle from './LineToggle';
 import { BlockStack } from './BlockStack';
 import { ComparisonLines } from './ComparisonLines';
+import CenterComparator from './CenterComparator';
 
 export type BlockKey = `left-${number}` | `right-${number}`;
 type Side = 'left' | 'right';
+type FlashState = 'none' | 'correct' | 'incorrect';
+
 
 const BlockContainer = () => {
   const [leftCount, setLeftCount] = useState<number>(5);
@@ -21,7 +24,21 @@ const BlockContainer = () => {
   const [newBlockIndices, setNewBlockIndices] = useState<Record<BlockKey, number>>({});
   const [poppingBlocks, setPoppingBlocks] = useState<Record<string, boolean>>({});
   const [lineMode, setLineMode] = useState<'show' | 'draw'>('show');
+  const [flashState, setFlashState] = useState<FlashState>('none');
 
+  const handleCorrectAnswer = () => {
+    playStackSound(10);
+    const flashDuration = 1000;
+    setFlashState('correct');
+    setTimeout(() => setFlashState('none'), flashDuration);
+  };
+  
+  const handleIncorrectAnswer = () => {
+    playStackSound(1); // Use a different sound for incorrect answers
+    const flashDuration = 1000;
+    setFlashState('incorrect');
+    setTimeout(() => setFlashState('none'), flashDuration);
+  };
   const { playStackSound } = useSound();
 
   const leftStackRef = useRef<HTMLDivElement>(null);
@@ -126,10 +143,16 @@ const BlockContainer = () => {
 
   return (
     <div className="max-w-7xl mx-auto flex flex-col h-screen overflow-hidden">
-      <div className="flex justify-between items-stretch gap-4 relative">
-        <div className="absolute top-[15%] left-1/2 -translate-x-1/2 text-lg text-gray-600 font-medium z-10">
-          Click blocks to remove them
-        </div>
+    <div className="flex justify-between items-stretch gap-4 relative">
+      {/* Add CenterComparator here */}
+      <CenterComparator 
+        leftCount={leftCount} 
+        rightCount={rightCount}
+        leftStackRef={leftStackRef}
+        rightStackRef={rightStackRef}
+        onCorrectAnswer={handleCorrectAnswer}
+        onIncorrectAnswer={handleIncorrectAnswer}
+      />
 
         {/* Left Control Panel */}
         <div className="flex-none self-center">
@@ -151,6 +174,7 @@ const BlockContainer = () => {
           onRemoveBlock={(index) => removeBlock('left', index)}
           onAnimationComplete={handleBlockAnimationComplete}
           stackRef={leftStackRef}
+          flashState={flashState}
         />
 
         <BlockStack
@@ -164,7 +188,8 @@ const BlockContainer = () => {
           onRemoveBlock={(index) => removeBlock('right', index)}
           onAnimationComplete={handleBlockAnimationComplete}
           stackRef={rightStackRef}
-        />
+          flashState={flashState}
+          />
 
         {/* Right Control Panel */}
         <div className="flex-none self-center">
