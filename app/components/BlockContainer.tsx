@@ -10,6 +10,7 @@ import LineToggle from './LineToggle';
 import { BlockStack } from './BlockStack';
 import { ComparisonLines } from './ComparisonLines';
 import CenterComparator from './CenterComparator';
+import TutorialInstructions from './TutorialInstructions';
 
 export type BlockKey = `left-${number}` | `right-${number}`;
 type Side = 'left' | 'right';
@@ -25,6 +26,7 @@ const BlockContainer = () => {
   const [poppingBlocks, setPoppingBlocks] = useState<Record<string, boolean>>({});
   const [lineMode, setLineMode] = useState<'show' | 'draw'>('show');
   const [flashState, setFlashState] = useState<FlashState>('none');
+  const [showTutorial, setShowTutorial] = useState<boolean>(true);
 
   const handleCorrectAnswer = () => {
     playStackSound(10);
@@ -143,6 +145,11 @@ const BlockContainer = () => {
 
   return (
     <div className="max-w-7xl mx-auto flex flex-col h-screen overflow-hidden">
+              {showTutorial && (
+        <TutorialInstructions 
+          onComplete={() => setShowTutorial(false)}
+        />
+      )}
     <div className="flex justify-between items-stretch gap-4 relative">
       {/* Add CenterComparator here */}
       <CenterComparator 

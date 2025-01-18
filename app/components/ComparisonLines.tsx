@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 interface ComparisonLinesProps {
   leftStackRef: React.RefObject<HTMLDivElement | null>;
@@ -28,6 +28,36 @@ export const ComparisonLines: React.FC<ComparisonLinesProps> = ({
   const [isDragging, setIsDragging] = useState(false);
   const [mousePos, setMousePos] = useState<{x: number, y: number} | null>(null);
   const [dragStart, setDragStart] = useState<{x: number, y: number, position: CirclePosition} | null>(null);
+  const [previousCounts, setPreviousCounts] = useState({ left: leftCount, right: rightCount });
+
+  const resetLines = useCallback(() => {
+    setDrawnLines([]);
+    setClickedCircles(new Set());
+    setSelectedCircle(null);
+    setMousePos(null);
+    setIsDragging(false);
+    setDragStart(null);
+  }, []);
+
+  useEffect(() => {
+    const leftStack = leftStackRef.current;
+    const rightStack = rightStackRef.current;
+  
+    if (!leftStack || !rightStack) return;
+  
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.type === 'childList') {
+          resetLines();
+        }
+      });
+    });
+  
+    observer.observe(leftStack, { childList: true });
+    observer.observe(rightStack, { childList: true });
+  
+    return () => observer.disconnect();
+  }, [leftStackRef, rightStackRef, resetLines]);
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
