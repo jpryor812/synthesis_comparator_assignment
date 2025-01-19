@@ -38,14 +38,14 @@ const BlockContainer = () => {
           setTimeout(addInitialBlocks, 300);
         } else {
           setIsInitializing(false);
-          // Show tutorial after blocks finish dropping
-          setTimeout(() => setShowTutorial(true), 500); // Added 500ms delay for smoother transition
+         
+          setTimeout(() => setShowTutorial(true), 500);
         }
       };
 
-      setTimeout(addInitialBlocks, 500); // Initial delay before blocks start dropping
+      setTimeout(addInitialBlocks, 100); 
     }
-  }, [isInitializing]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [isInitializing]); 
 
   const handleCorrectAnswer = () => {
     playStackSound(10);
