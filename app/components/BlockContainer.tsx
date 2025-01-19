@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useCallback, useRef } from 'react';
+import dynamic from 'next/dynamic';
 import { useSound } from '../hooks/useSound';
 import ControlPanel from './ControlPanel';
 import LineToggle from './LineToggle';
@@ -24,6 +25,16 @@ const BlockContainer = () => {
   const [lineMode, setLineMode] = useState<'show' | 'draw'>('show');
   const [flashState, setFlashState] = useState<FlashState>('none');
   const [showTutorial, setShowTutorial] = useState<boolean>(true);
+
+  const ComparisonLines = dynamic(() => 
+    import('./ComparisonLines').then(mod => mod.ComparisonLines), {
+      ssr: false
+  });
+  
+  const CenterComparator = dynamic(() => 
+    import('./CenterComparator').then(mod => mod.default), {
+      ssr: false
+  });
 
   const handleCorrectAnswer = () => {
     playStackSound(10);
