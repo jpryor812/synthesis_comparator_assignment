@@ -8,6 +8,7 @@ interface ComparisonLinesProps {
   leftCount: number;
   rightCount: number;
   lineMode: 'show' | 'draw';
+  showTutorial: boolean;
 }
 
 type CirclePosition = 'leftTop' | 'leftBottom' | 'rightTop' | 'rightBottom';
@@ -21,7 +22,8 @@ export const ComparisonLines: React.FC<ComparisonLinesProps> = ({
   rightStackRef,
   leftCount,
   rightCount,
-  lineMode
+  lineMode,
+  showTutorial
 }) => {
 
     const hasMounted = useRef(false);
@@ -65,7 +67,6 @@ export const ComparisonLines: React.FC<ComparisonLinesProps> = ({
         return () => resizeObserver.disconnect();
     }, [leftStackRef, rightStackRef]);
     
-    // Add this effect back
     useEffect(() => {
         if (!hasMounted.current) return;
         const leftStack = leftStackRef.current;
@@ -132,7 +133,7 @@ export const ComparisonLines: React.FC<ComparisonLinesProps> = ({
         setClickedCircles(new Set());
       }, [leftCount, rightCount]);
     
-      if (typeof window === 'undefined' || !hasMounted.current || !isPositioned) {
+      if (typeof window === 'undefined' || !hasMounted.current || !isPositioned || showTutorial) {
         return null;
       }
 
