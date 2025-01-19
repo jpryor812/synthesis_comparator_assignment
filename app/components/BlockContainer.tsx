@@ -6,8 +6,6 @@ import { useSound } from '../hooks/useSound';
 import ControlPanel from './ControlPanel';
 import LineToggle from './LineToggle';
 import { BlockStack } from './BlockStack';
-import { ComparisonLines } from './ComparisonLines';
-import CenterComparator from './CenterComparator';
 import TutorialInstructions from './TutorialInstructions';
 
 export type BlockKey = `left-${number}` | `right-${number}`;
