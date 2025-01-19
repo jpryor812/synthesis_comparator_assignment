@@ -63,7 +63,7 @@ const BlockContainer = () => {
 
   const handleBlockAnimationComplete = (key: BlockKey): void => {
     setNewBlockIndices(prev => {
-      const { [key]: _, ...rest } = prev;
+      const { [key]: undefined, ...rest } = prev;
       return rest;
     });
 
@@ -209,6 +209,11 @@ const BlockContainer = () => {
         />
       </div>
 
+      {showTutorial && (
+        <TutorialInstructions 
+          onComplete={() => setShowTutorial(false)}
+        />
+      )}
 
       <div className="flex justify-center">
         <LineToggle mode={lineMode} onModeChange={setLineMode} />
