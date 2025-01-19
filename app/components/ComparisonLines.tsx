@@ -33,38 +33,59 @@ export const ComparisonLines: React.FC<ComparisonLinesProps> = ({
     const [mousePos, setMousePos] = useState<{x: number, y: number} | null>(null);
     const [dragStart, setDragStart] = useState<{x: number, y: number, position: CirclePosition} | null>(null);
 
-  const resetLines = useCallback(() => {
-    setDrawnLines([]);
-    setClickedCircles(new Set());
-    setSelectedCircle(null);
-    setMousePos(null);
-    setIsDragging(false);
-    setDragStart(null);
-  }, []);
-
-  useEffect(() => {
-    hasMounted.current = true;
-    return () => {
-      hasMounted.current = false;
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!hasMounted.current) return;
-    if (!leftStackRef.current || !rightStackRef.current) return;
-  
-    const resizeObserver = new ResizeObserver(() => {
-        requestAnimationFrame(() => {
-          setIsPositioned(true);
+    const resetLines = useCallback(() => {
+        setDrawnLines([]);
+        setClickedCircles(new Set());
+        setSelectedCircle(null);
+        setMousePos(null);
+        setIsDragging(false);
+        setDragStart(null);
+    }, []);
+    
+    useEffect(() => {
+        hasMounted.current = true;
+        return () => {
+            hasMounted.current = false;
+        };
+    }, []);
+    
+    useEffect(() => {
+        if (!hasMounted.current) return;
+        if (!leftStackRef.current || !rightStackRef.current) return;
+    
+        const resizeObserver = new ResizeObserver(() => {
+            requestAnimationFrame(() => {
+                setIsPositioned(true);
+            });
         });
-      });
-  
-      resizeObserver.observe(leftStackRef.current);
-      resizeObserver.observe(rightStackRef.current);
-  
-      return () => resizeObserver.disconnect();
+    
+        resizeObserver.observe(leftStackRef.current);
+        resizeObserver.observe(rightStackRef.current);
+    
+        return () => resizeObserver.disconnect();
     }, [leftStackRef, rightStackRef]);
-  
+    
+    // Add this effect back
+    useEffect(() => {
+        if (!hasMounted.current) return;
+        const leftStack = leftStackRef.current;
+        const rightStack = rightStackRef.current;
+    
+        if (!leftStack || !rightStack) return;
+    
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (mutation.type === 'childList') {
+                    resetLines();
+                }
+            });
+        });
+    
+        observer.observe(leftStack, { childList: true });
+        observer.observe(rightStack, { childList: true });
+    
+        return () => observer.disconnect();
+    }, [leftStackRef, rightStackRef, resetLines]);
 
   useEffect(() => {
     if (!hasMounted.current) return;
