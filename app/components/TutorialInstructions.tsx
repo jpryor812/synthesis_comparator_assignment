@@ -119,7 +119,7 @@ const TutorialInstructions: React.FC<TutorialInstructionsProps> = ({ onComplete 
         if (!isMuted && (hasInteracted || !initialAudioPendingRef.current)) {
           try {
             await audioRef.current.play();
-          } catch (error) {
+          } catch {
             console.log('Auto-play prevented. Waiting for user interaction.');
           }
         }

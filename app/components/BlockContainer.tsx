@@ -66,7 +66,7 @@ const BlockContainer = () => {
       const { [key]: _, ...rest } = prev;
       return rest;
     });
-    playStackSound(Number(key?.split('-')?.[1] ?? 0));
+
 };
 
   const removeBlock = useCallback((side: Side, index: number, shouldUpdateCount = true) => {
@@ -96,7 +96,7 @@ const BlockContainer = () => {
       }
 
       setPoppingBlocks(prev => {
-        const { [key]: _, ...rest } = prev;
+        const { [key]: undefined, ...rest } = prev;
         return rest;
       });
     }, 300);
@@ -209,11 +209,6 @@ const BlockContainer = () => {
         />
       </div>
 
-      {showTutorial && (
-        <TutorialInstructions 
-          onComplete={() => setShowTutorial(false)}
-        />
-      )}
 
       <div className="flex justify-center">
         <LineToggle mode={lineMode} onModeChange={setLineMode} />

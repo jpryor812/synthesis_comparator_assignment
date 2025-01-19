@@ -28,7 +28,6 @@ export const ComparisonLines: React.FC<ComparisonLinesProps> = ({
   const [isDragging, setIsDragging] = useState(false);
   const [mousePos, setMousePos] = useState<{x: number, y: number} | null>(null);
   const [dragStart, setDragStart] = useState<{x: number, y: number, position: CirclePosition} | null>(null);
-  const [previousCounts, setPreviousCounts] = useState({ left: leftCount, right: rightCount });
 
   const resetLines = useCallback(() => {
     setDrawnLines([]);
@@ -104,7 +103,6 @@ export const ComparisonLines: React.FC<ComparisonLinesProps> = ({
   const leftContainerRect = leftStackRef.current?.getBoundingClientRect() || new DOMRect();
   const rightContainerRect = rightStackRef.current?.getBoundingClientRect() || new DOMRect();
   
-  const blockWidth = 48;
   const blockHeight = 48;
   const blockGap = 4;
   
