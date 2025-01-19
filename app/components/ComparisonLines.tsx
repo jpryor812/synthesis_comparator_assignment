@@ -8,7 +8,6 @@ interface ComparisonLinesProps {
   leftCount: number;
   rightCount: number;
   lineMode: 'show' | 'draw';
-  showTutorial: boolean;
 }
 
 type CirclePosition = 'leftTop' | 'leftBottom' | 'rightTop' | 'rightBottom';
@@ -22,8 +21,7 @@ export const ComparisonLines: React.FC<ComparisonLinesProps> = ({
   rightStackRef,
   leftCount,
   rightCount,
-  lineMode,
-  showTutorial
+  lineMode
 }) => {
 
     const hasMounted = useRef(false);
@@ -54,17 +52,35 @@ export const ComparisonLines: React.FC<ComparisonLinesProps> = ({
     useEffect(() => {
         if (!hasMounted.current) return;
         if (!leftStackRef.current || !rightStackRef.current) return;
+
+        const checkPositions = () => {
+            const leftRect = leftStackRef.current?.getBoundingClientRect();
+            const rightRect = rightStackRef.current?.getBoundingClientRect();
+            const svgRect = document.querySelector('.block-container-svg')?.getBoundingClientRect();
+    
+            if (leftRect && rightRect && svgRect && 
+                leftRect.right > 0 && rightRect.left > 0 && 
+                svgRect.width > 0) {
+                setIsPositioned(true);
+            }
+        };
+    
+        // Initial check
+        checkPositions();
     
         const resizeObserver = new ResizeObserver(() => {
-            requestAnimationFrame(() => {
-                setIsPositioned(true);
-            });
+            requestAnimationFrame(checkPositions);
         });
     
         resizeObserver.observe(leftStackRef.current);
         resizeObserver.observe(rightStackRef.current);
+
+        const timeout = setTimeout(checkPositions, 500);
     
-        return () => resizeObserver.disconnect();
+        return () => {
+            resizeObserver.disconnect();
+            clearTimeout(timeout);
+        };
     }, [leftStackRef, rightStackRef]);
     
     useEffect(() => {
@@ -133,7 +149,7 @@ export const ComparisonLines: React.FC<ComparisonLinesProps> = ({
         setClickedCircles(new Set());
       }, [leftCount, rightCount]);
     
-      if (typeof window === 'undefined' || !hasMounted.current || !isPositioned || showTutorial) {
+      if (typeof window === 'undefined' || !hasMounted.current || !isPositioned) {
         return null;
       }
 

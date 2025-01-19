@@ -207,7 +207,6 @@ const BlockContainer = () => {
           leftCount={leftCount}
           rightCount={rightCount}
           lineMode={lineMode}
-          showTutorial={showTutorial}
         />
       </div>
 
