@@ -52,35 +52,17 @@ export const ComparisonLines: React.FC<ComparisonLinesProps> = ({
     useEffect(() => {
         if (!hasMounted.current) return;
         if (!leftStackRef.current || !rightStackRef.current) return;
-
-        const checkPositions = () => {
-            const leftRect = leftStackRef.current?.getBoundingClientRect();
-            const rightRect = rightStackRef.current?.getBoundingClientRect();
-            const svgRect = document.querySelector('.block-container-svg')?.getBoundingClientRect();
-    
-            if (leftRect && rightRect && svgRect && 
-                leftRect.right > 0 && rightRect.left > 0 && 
-                svgRect.width > 0) {
-                setIsPositioned(true);
-            }
-        };
-    
-        // Initial check
-        checkPositions();
     
         const resizeObserver = new ResizeObserver(() => {
-            requestAnimationFrame(checkPositions);
+            requestAnimationFrame(() => {
+                setIsPositioned(true);
+            });
         });
     
         resizeObserver.observe(leftStackRef.current);
         resizeObserver.observe(rightStackRef.current);
-
-        const timeout = setTimeout(checkPositions, 500);
     
-        return () => {
-            resizeObserver.disconnect();
-            clearTimeout(timeout);
-        };
+        return () => resizeObserver.disconnect();
     }, [leftStackRef, rightStackRef]);
     
     useEffect(() => {

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { useSound } from '../hooks/useSound';
 import ControlPanel from './ControlPanel';
 import LineToggle from './LineToggle';
@@ -13,17 +13,39 @@ export type BlockKey = `left-${number}` | `right-${number}`;
 type Side = 'left' | 'right';
 type FlashState = 'none' | 'correct' | 'incorrect';
 
-
 const BlockContainer = () => {
-  const [leftCount, setLeftCount] = useState<number>(5);
-  const [rightCount, setRightCount] = useState<number>(5);
+  const [leftCount, setLeftCount] = useState<number>(0);
+  const [rightCount, setRightCount] = useState<number>(0);
   const [isLeftDispensing, setIsLeftDispensing] = useState<boolean>(false);
   const [isRightDispensing, setIsRightDispensing] = useState<boolean>(false);
   const [newBlockIndices, setNewBlockIndices] = useState<Record<BlockKey, number>>({});
   const [poppingBlocks, setPoppingBlocks] = useState<Record<string, boolean>>({});
   const [lineMode, setLineMode] = useState<'show' | 'draw'>('show');
   const [flashState, setFlashState] = useState<FlashState>('none');
-  const [showTutorial, setShowTutorial] = useState<boolean>(true);
+  const [showTutorial, setShowTutorial] = useState<boolean>(false);
+  const [isInitializing, setIsInitializing] = useState<boolean>(true);
+
+  useEffect(() => {
+    if (isInitializing) {
+      const initialBlockCount = 5;
+      let currentCount = 0;
+
+      const addInitialBlocks = () => {
+        if (currentCount < initialBlockCount) {
+          addBlock('left');
+          addBlock('right');
+          currentCount++;
+          setTimeout(addInitialBlocks, 300);
+        } else {
+          setIsInitializing(false);
+          // Show tutorial after blocks finish dropping
+          setTimeout(() => setShowTutorial(true), 500); // Added 500ms delay for smoother transition
+        }
+      };
+
+      setTimeout(addInitialBlocks, 500); // Initial delay before blocks start dropping
+    }
+  }, [isInitializing]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleCorrectAnswer = () => {
     playStackSound(10);
@@ -38,6 +60,7 @@ const BlockContainer = () => {
     setFlashState('incorrect');
     setTimeout(() => setFlashState('none'), flashDuration);
   };
+
   const { playStackSound } = useSound();
 
   const leftStackRef = useRef<HTMLDivElement>(null);
@@ -107,60 +130,57 @@ const BlockContainer = () => {
     const currentCount = side === 'left' ? leftCount : rightCount;
     
     if (newCount > currentCount) {
-        const blocksToAdd = newCount - currentCount;
-        let added = 0;
-        
-        const addNextBlock = () => {
-            if (added < blocksToAdd) {
-                addBlock(side);
-                added++;
-                setTimeout(addNextBlock, 200);
-            }
-        };
-        
-        addNextBlock();
+      const blocksToAdd = newCount - currentCount;
+      let added = 0;
+      
+      const addNextBlock = () => {
+        if (added < blocksToAdd) {
+          addBlock(side);
+          added++;
+          setTimeout(addNextBlock, 200);
+        }
+      };
+      
+      addNextBlock();
     } else if (newCount < currentCount) {
-        const removeBlocksSequentially = (remainingBlocks: number) => {
-            if (remainingBlocks > newCount) {
-                if (side === 'left') {
-                    setLeftCount(remainingBlocks - 1);
-                } else {
-                    setRightCount(remainingBlocks - 1);
-                }
-                
-                // Then trigger block removal animation
-                removeBlock(side, remainingBlocks - 1, false);
-                
-                setTimeout(() => {
-                    removeBlocksSequentially(remainingBlocks - 1);
-                }, 300);
-            }
-        };
-        
-        removeBlocksSequentially(currentCount);
+      const removeBlocksSequentially = (remainingBlocks: number) => {
+        if (remainingBlocks > newCount) {
+          if (side === 'left') {
+            setLeftCount(remainingBlocks - 1);
+          } else {
+            setRightCount(remainingBlocks - 1);
+          }
+          
+          removeBlock(side, remainingBlocks - 1, false);
+          
+          setTimeout(() => {
+            removeBlocksSequentially(remainingBlocks - 1);
+          }, 300);
+        }
+      };
+      
+      removeBlocksSequentially(currentCount);
     }
-}, [leftCount, rightCount, addBlock, removeBlock]);
+  }, [leftCount, rightCount, addBlock, removeBlock]);
 
   return (
     <div className="max-w-7xl mx-auto flex flex-col h-screen overflow-hidden">
+      <div className="flex justify-between items-stretch gap-4 relative">
+        <CenterComparator 
+          leftCount={leftCount} 
+          rightCount={rightCount}
+          leftStackRef={leftStackRef}
+          rightStackRef={rightStackRef}
+          onCorrectAnswer={handleCorrectAnswer}
+          onIncorrectAnswer={handleIncorrectAnswer}
+        />
 
-      
-    <div className="flex justify-between items-stretch gap-4 relative">
-      <CenterComparator 
-        leftCount={leftCount} 
-        rightCount={rightCount}
-        leftStackRef={leftStackRef}
-        rightStackRef={rightStackRef}
-        onCorrectAnswer={handleCorrectAnswer}
-        onIncorrectAnswer={handleIncorrectAnswer}
-      />
-
-        {/* Left Control Panel */}
         <div className="flex-none self-center">
           <ControlPanel 
             onNumberChange={(number) => handleControlPanelChange('left', number)} 
             currentBlocks={leftCount}
             maxBlocks={10}
+            disabled={isInitializing}
           />
         </div>
 
@@ -190,14 +210,14 @@ const BlockContainer = () => {
           onAnimationComplete={handleBlockAnimationComplete}
           stackRef={rightStackRef}
           flashState={flashState}
-          />
+        />
 
-        {/* Right Control Panel */}
         <div className="flex-none self-center">
           <ControlPanel 
             onNumberChange={(number) => handleControlPanelChange('right', number)} 
             currentBlocks={rightCount}
             maxBlocks={10}
+            disabled={isInitializing}
           />
         </div>
 
