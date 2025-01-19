@@ -6,6 +6,8 @@ import { useSound } from '../hooks/useSound';
 import ControlPanel from './ControlPanel';
 import LineToggle from './LineToggle';
 import { BlockStack } from './BlockStack';
+import { ComparisonLines } from './ComparisonLines';
+import CenterComparator from './CenterComparator';
 import TutorialInstructions from './TutorialInstructions';
 
 export type BlockKey = `left-${number}` | `right-${number}`;
@@ -23,16 +25,6 @@ const BlockContainer = () => {
   const [lineMode, setLineMode] = useState<'show' | 'draw'>('show');
   const [flashState, setFlashState] = useState<FlashState>('none');
   const [showTutorial, setShowTutorial] = useState<boolean>(true);
-
-  const ComparisonLines = dynamic(() => 
-    import('./ComparisonLines').then(mod => mod.ComparisonLines), {
-      ssr: false
-  });
-  
-  const CenterComparator = dynamic(() => 
-    import('./CenterComparator').then(mod => mod.default), {
-      ssr: false
-  });
 
   const handleCorrectAnswer = () => {
     playStackSound(10);

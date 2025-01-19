@@ -1,5 +1,6 @@
 'use client';
-import { useState, useEffect, useCallback } from 'react';
+
+import { useState, useEffect, useCallback, useRef } from 'react';
 
 interface ComparisonLinesProps {
   leftStackRef: React.RefObject<HTMLDivElement | null>;
@@ -22,12 +23,26 @@ export const ComparisonLines: React.FC<ComparisonLinesProps> = ({
   rightCount,
   lineMode
 }) => {
+
+    const hasMounted = useRef(false);
+  
+    useEffect(() => {
+      hasMounted.current = true;
+      return () => {
+        hasMounted.current = false;
+      };
+    }, []);
+
   const [clickedCircles, setClickedCircles] = useState<Set<CirclePosition>>(new Set());
   const [selectedCircle, setSelectedCircle] = useState<CirclePosition | null>(null);
   const [drawnLines, setDrawnLines] = useState<DrawnLine[]>([]);
   const [isDragging, setIsDragging] = useState(false);
   const [mousePos, setMousePos] = useState<{x: number, y: number} | null>(null);
   const [dragStart, setDragStart] = useState<{x: number, y: number, position: CirclePosition} | null>(null);
+
+  if (typeof window === 'undefined' || !hasMounted.current) {
+    return null;
+  }
 
   const resetLines = useCallback(() => {
     setDrawnLines([]);

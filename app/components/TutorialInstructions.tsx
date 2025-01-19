@@ -1,3 +1,5 @@
+
+
 import React, { useState, useEffect, useRef } from 'react';
 import { ChevronRight, Volume2, VolumeX, Loader2 } from 'lucide-react';
 
@@ -63,7 +65,6 @@ const TutorialInstructions: React.FC<TutorialInstructionsProps> = ({ onComplete 
     try {
       setIsLoading(true);
       
-      // Log the API key (first few characters for debugging)
       const apiKey = process.env.NEXT_PUBLIC_ELEVENLABS_API_KEY;
       console.log('API Key starts with:', apiKey?.substring(0, 5));
       
