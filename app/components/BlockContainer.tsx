@@ -63,11 +63,10 @@ const BlockContainer = () => {
 
   const handleBlockAnimationComplete = (key: BlockKey): void => {
     setNewBlockIndices(prev => {
-      const { [key]: undefined, ...rest } = prev;
+      const { [key]: _, ...rest } = prev;  // Use underscore instead of undefined
       return rest;
     });
-
-};
+  };
 
   const removeBlock = useCallback((side: Side, index: number, shouldUpdateCount = true) => {
     const key = `${side}-${index}`;
@@ -96,7 +95,7 @@ const BlockContainer = () => {
       }
 
       setPoppingBlocks(prev => {
-        const { [key]: undefined, ...rest } = prev;
+        const { [key]: _, ...rest } = prev;  // Use underscore instead of undefined
         return rest;
       });
     }, 300);
