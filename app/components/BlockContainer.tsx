@@ -63,8 +63,9 @@ const BlockContainer = () => {
 
   const handleBlockAnimationComplete = (key: BlockKey): void => {
     setNewBlockIndices(prev => {
-      const { [key]: _, ...rest } = prev;  // Use underscore instead of undefined
-      return rest;
+      const newIndices = { ...prev };
+      delete newIndices[key];
+      return newIndices;
     });
   };
 
@@ -95,8 +96,9 @@ const BlockContainer = () => {
       }
 
       setPoppingBlocks(prev => {
-        const { [key]: _, ...rest } = prev;  // Use underscore instead of undefined
-        return rest;
+        const newBlocks = { ...prev };
+        delete newBlocks[key];
+        return newBlocks;
       });
     }, 300);
   }, []);
