@@ -25,13 +25,6 @@ export const ComparisonLines: React.FC<ComparisonLinesProps> = ({
 }) => {
 
     const hasMounted = useRef(false);
-  
-    useEffect(() => {
-      hasMounted.current = true;
-      return () => {
-        hasMounted.current = false;
-      };
-    }, []);
 
   const [clickedCircles, setClickedCircles] = useState<Set<CirclePosition>>(new Set());
   const [selectedCircle, setSelectedCircle] = useState<CirclePosition | null>(null);
@@ -39,10 +32,6 @@ export const ComparisonLines: React.FC<ComparisonLinesProps> = ({
   const [isDragging, setIsDragging] = useState(false);
   const [mousePos, setMousePos] = useState<{x: number, y: number} | null>(null);
   const [dragStart, setDragStart] = useState<{x: number, y: number, position: CirclePosition} | null>(null);
-
-  if (typeof window === 'undefined' || !hasMounted.current) {
-    return null;
-  }
 
   const resetLines = useCallback(() => {
     setDrawnLines([]);
@@ -54,6 +43,14 @@ export const ComparisonLines: React.FC<ComparisonLinesProps> = ({
   }, []);
 
   useEffect(() => {
+    hasMounted.current = true;
+    return () => {
+      hasMounted.current = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!hasMounted.current) return;
     const leftStack = leftStackRef.current;
     const rightStack = rightStackRef.current;
   
@@ -74,6 +71,7 @@ export const ComparisonLines: React.FC<ComparisonLinesProps> = ({
   }, [leftStackRef, rightStackRef, resetLines]);
 
   useEffect(() => {
+    if (!hasMounted.current) return;
     const handleMouseMove = (e: MouseEvent) => {
       const svgRect = document.querySelector('.block-container-svg')?.getBoundingClientRect();
       if (svgRect && (isDragging || selectedCircle)) {
@@ -104,16 +102,22 @@ export const ComparisonLines: React.FC<ComparisonLinesProps> = ({
       };
     }, [isDragging, selectedCircle]);
 
-  useEffect(() => {
-    if (leftStackRef.current && rightStackRef.current) {
-      setClickedCircles(new Set());
-    }
-  }, [leftStackRef.current, rightStackRef.current]);
-
-  useEffect(() => {
-    setDrawnLines([]);
-    setClickedCircles(new Set());
-  }, [leftCount, rightCount]);
+    useEffect(() => {
+        if (!hasMounted.current) return;
+        if (leftStackRef.current && rightStackRef.current) {
+          setClickedCircles(new Set());
+        }
+      }, [leftStackRef, rightStackRef]); // Changed dependency array
+    
+      useEffect(() => {
+        if (!hasMounted.current) return;
+        setDrawnLines([]);
+        setClickedCircles(new Set());
+      }, [leftCount, rightCount]);
+    
+      if (typeof window === 'undefined' || !hasMounted.current) {
+        return null;
+      }
 
   const leftContainerRect = leftStackRef.current?.getBoundingClientRect() || new DOMRect();
   const rightContainerRect = rightStackRef.current?.getBoundingClientRect() || new DOMRect();
