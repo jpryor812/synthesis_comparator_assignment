@@ -33,7 +33,7 @@ const BlockContainer = () => {
   };
   
   const handleIncorrectAnswer = () => {
-    playStackSound(1); // Use a different sound for incorrect answers
+    playStackSound(1); 
     const flashDuration = 1000;
     setFlashState('incorrect');
     setTimeout(() => setFlashState('none'), flashDuration);
@@ -106,7 +106,6 @@ const BlockContainer = () => {
     const currentCount = side === 'left' ? leftCount : rightCount;
     
     if (newCount > currentCount) {
-        // Adding blocks (keep this part the same)
         const blocksToAdd = newCount - currentCount;
         let added = 0;
         
@@ -120,10 +119,8 @@ const BlockContainer = () => {
         
         addNextBlock();
     } else if (newCount < currentCount) {
-        // Remove blocks sequentially
         const removeBlocksSequentially = (remainingBlocks: number) => {
             if (remainingBlocks > newCount) {
-                // Update count first
                 if (side === 'left') {
                     setLeftCount(remainingBlocks - 1);
                 } else {
@@ -148,7 +145,6 @@ const BlockContainer = () => {
 
       
     <div className="flex justify-between items-stretch gap-4 relative">
-      {/* Add CenterComparator here */}
       <CenterComparator 
         leftCount={leftCount} 
         rightCount={rightCount}
@@ -212,6 +208,12 @@ const BlockContainer = () => {
           lineMode={lineMode}
         />
       </div>
+
+      {showTutorial && (
+        <TutorialInstructions 
+          onComplete={() => setShowTutorial(false)}
+        />
+      )}
 
       <div className="flex justify-center">
         <LineToggle mode={lineMode} onModeChange={setLineMode} />
