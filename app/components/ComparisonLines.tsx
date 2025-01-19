@@ -25,13 +25,13 @@ export const ComparisonLines: React.FC<ComparisonLinesProps> = ({
 }) => {
 
     const hasMounted = useRef(false);
-
-  const [clickedCircles, setClickedCircles] = useState<Set<CirclePosition>>(new Set());
-  const [selectedCircle, setSelectedCircle] = useState<CirclePosition | null>(null);
-  const [drawnLines, setDrawnLines] = useState<DrawnLine[]>([]);
-  const [isDragging, setIsDragging] = useState(false);
-  const [mousePos, setMousePos] = useState<{x: number, y: number} | null>(null);
-  const [dragStart, setDragStart] = useState<{x: number, y: number, position: CirclePosition} | null>(null);
+    const [isPositioned, setIsPositioned] = useState(false);  
+    const [clickedCircles, setClickedCircles] = useState<Set<CirclePosition>>(new Set());
+    const [selectedCircle, setSelectedCircle] = useState<CirclePosition | null>(null);
+    const [drawnLines, setDrawnLines] = useState<DrawnLine[]>([]);
+    const [isDragging, setIsDragging] = useState(false);
+    const [mousePos, setMousePos] = useState<{x: number, y: number} | null>(null);
+    const [dragStart, setDragStart] = useState<{x: number, y: number, position: CirclePosition} | null>(null);
 
   const resetLines = useCallback(() => {
     setDrawnLines([]);
@@ -51,24 +51,20 @@ export const ComparisonLines: React.FC<ComparisonLinesProps> = ({
 
   useEffect(() => {
     if (!hasMounted.current) return;
-    const leftStack = leftStackRef.current;
-    const rightStack = rightStackRef.current;
+    if (!leftStackRef.current || !rightStackRef.current) return;
   
-    if (!leftStack || !rightStack) return;
-  
-    const observer = new MutationObserver((mutations) => {
-      mutations.forEach((mutation) => {
-        if (mutation.type === 'childList') {
-          resetLines();
-        }
+    const resizeObserver = new ResizeObserver(() => {
+        requestAnimationFrame(() => {
+          setIsPositioned(true);
+        });
       });
-    });
   
-    observer.observe(leftStack, { childList: true });
-    observer.observe(rightStack, { childList: true });
+      resizeObserver.observe(leftStackRef.current);
+      resizeObserver.observe(rightStackRef.current);
   
-    return () => observer.disconnect();
-  }, [leftStackRef, rightStackRef, resetLines]);
+      return () => resizeObserver.disconnect();
+    }, [leftStackRef, rightStackRef]);
+  
 
   useEffect(() => {
     if (!hasMounted.current) return;
@@ -107,7 +103,7 @@ export const ComparisonLines: React.FC<ComparisonLinesProps> = ({
         if (leftStackRef.current && rightStackRef.current) {
           setClickedCircles(new Set());
         }
-      }, [leftStackRef, rightStackRef]); // Changed dependency array
+      }, [leftStackRef, rightStackRef]); 
     
       useEffect(() => {
         if (!hasMounted.current) return;
@@ -115,7 +111,7 @@ export const ComparisonLines: React.FC<ComparisonLinesProps> = ({
         setClickedCircles(new Set());
       }, [leftCount, rightCount]);
     
-      if (typeof window === 'undefined' || !hasMounted.current) {
+      if (typeof window === 'undefined' || !hasMounted.current || !isPositioned) {
         return null;
       }
 
