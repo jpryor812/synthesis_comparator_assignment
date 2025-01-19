@@ -1,5 +1,6 @@
 'use client';
-import { useState, useEffect, useCallback } from 'react';
+
+import React, { useState, useEffect, useCallback } from 'react';
 
 interface ComparisonLinesProps {
   leftStackRef: React.RefObject<HTMLDivElement | null>;
@@ -28,7 +29,27 @@ export const ComparisonLines: React.FC<ComparisonLinesProps> = ({
   const [isDragging, setIsDragging] = useState(false);
   const [mousePos, setMousePos] = useState<{x: number, y: number} | null>(null);
   const [dragStart, setDragStart] = useState<{x: number, y: number, position: CirclePosition} | null>(null);
-  const [previousCounts, setPreviousCounts] = useState({ left: leftCount, right: rightCount });
+  const [coordinates, setCoordinates] = useState({
+    leftX: 0,
+    rightX: 0,
+    leftTopY: 0,
+    rightTopY: 0,
+    leftBottomY: 0,
+    rightBottomY: 0
+  });
+
+  // Define default rect object
+  const defaultRect = {
+    x: 0,
+    y: 0,
+    width: 0,
+    height: 0,
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
+    toJSON: () => {},
+  };
 
   const resetLines = useCallback(() => {
     setDrawnLines([]);
@@ -39,30 +60,14 @@ export const ComparisonLines: React.FC<ComparisonLinesProps> = ({
     setDragStart(null);
   }, []);
 
-  useEffect(() => {
-    const leftStack = leftStackRef.current;
-    const rightStack = rightStackRef.current;
-  
-    if (!leftStack || !rightStack) return;
-  
-    const observer = new MutationObserver((mutations) => {
-      mutations.forEach((mutation) => {
-        if (mutation.type === 'childList') {
-          resetLines();
-        }
-      });
-    });
-  
-    observer.observe(leftStack, { childList: true });
-    observer.observe(rightStack, { childList: true });
-  
-    return () => observer.disconnect();
-  }, [leftStackRef, rightStackRef, resetLines]);
-
+  // Handle mouse events
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
-      const svgRect = document.querySelector('.block-container-svg')?.getBoundingClientRect();
-      if (svgRect && (isDragging || selectedCircle)) {
+      if (!isDragging && !selectedCircle) return;
+      
+      const svgElement = document.querySelector('.block-container-svg');
+      if (svgElement) {
+        const svgRect = svgElement.getBoundingClientRect();
         setMousePos({
           x: e.clientX - svgRect.left,
           y: e.clientY - svgRect.top
@@ -71,67 +76,65 @@ export const ComparisonLines: React.FC<ComparisonLinesProps> = ({
     };
 
     const handleMouseUp = () => {
-        if (isDragging) {
-          setIsDragging(false);
-          setDragStart(null);
-        }
-      };
-  
-      if (isDragging || selectedCircle) {
-        document.addEventListener('mousemove', handleMouseMove);
-      }
       if (isDragging) {
-        document.addEventListener('mouseup', handleMouseUp);
+        setIsDragging(false);
+        setDragStart(null);
       }
-  
-      return () => {
-        document.removeEventListener('mousemove', handleMouseMove);
-        document.removeEventListener('mouseup', handleMouseUp);
-      };
-    }, [isDragging, selectedCircle]);
+    };
 
-  useEffect(() => {
-    if (leftStackRef.current && rightStackRef.current) {
-      // Force a re-render
-      setClickedCircles(new Set());
+    if (isDragging || selectedCircle) {
+      document.addEventListener('mousemove', handleMouseMove);
     }
-  }, [leftStackRef.current, rightStackRef.current]);
+    if (isDragging) {
+      document.addEventListener('mouseup', handleMouseUp);
+    }
 
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isDragging, selectedCircle]);
+
+  // Calculate and update coordinates
   useEffect(() => {
-    // Reset drawn lines and clicked circles when block counts change
-    setDrawnLines([]);
-    setClickedCircles(new Set());
-  }, [leftCount, rightCount]);
+    if (typeof window === 'undefined') return;
 
-  // Get container positions
-  const leftContainerRect = leftStackRef.current?.getBoundingClientRect() || new DOMRect();
-  const rightContainerRect = rightStackRef.current?.getBoundingClientRect() || new DOMRect();
-  
-  // Block dimensions
-  const blockWidth = 48;
-  const blockHeight = 48;
-  const blockGap = 4;
-  
-  // Calculate exact positions for connecting points
-  const leftX = leftContainerRect.right;
-  const rightX = rightContainerRect.left;
-  
-  // Calculate Y positions for top blocks (reversed because flex-col-reverse)
-  const leftTopY = leftContainerRect.bottom - blockHeight/2 - (leftCount - 1) * (blockHeight + blockGap);
-  const rightTopY = rightContainerRect.bottom - blockHeight/2 - (rightCount - 1) * (blockHeight + blockGap);
-  
-  // Calculate Y positions for bottom blocks
-  const leftBottomY = leftContainerRect.bottom - blockHeight/2;
-  const rightBottomY = rightContainerRect.bottom - blockHeight/2;
+    const calculateCoordinates = () => {
+      const leftContainerRect = leftStackRef.current?.getBoundingClientRect() || defaultRect;
+      const rightContainerRect = rightStackRef.current?.getBoundingClientRect() || defaultRect;
+      const svgRect = document.querySelector('.block-container-svg')?.getBoundingClientRect() || defaultRect;
 
-  // Convert to relative coordinates
-  const svgRect = document.querySelector('.block-container-svg')?.getBoundingClientRect() || document.body.getBoundingClientRect();
-  const relativeLeftX = leftX - svgRect.left;
-  const relativeRightX = rightX - svgRect.left;
-  const relativeLeftTopY = leftTopY - svgRect.top;
-  const relativeRightTopY = rightTopY - svgRect.top;
-  const relativeLeftBottomY = leftBottomY - svgRect.top;
-  const relativeRightBottomY = rightBottomY - svgRect.top;
+      // Block dimensions
+      const blockWidth = 48;
+      const blockHeight = 48;
+      const blockGap = 4;
+
+      // Calculate positions
+      const leftX = leftContainerRect.right - svgRect.left;
+      const rightX = rightContainerRect.left - svgRect.left;
+      const leftTopY = leftContainerRect.bottom - blockHeight/2 - (leftCount - 1) * (blockHeight + blockGap) - svgRect.top;
+      const rightTopY = rightContainerRect.bottom - blockHeight/2 - (rightCount - 1) * (blockHeight + blockGap) - svgRect.top;
+      const leftBottomY = leftContainerRect.bottom - blockHeight/2 - svgRect.top;
+      const rightBottomY = rightContainerRect.bottom - blockHeight/2 - svgRect.top;
+
+      setCoordinates({
+        leftX,
+        rightX,
+        leftTopY,
+        rightTopY,
+        leftBottomY,
+        rightBottomY
+      });
+    };
+
+    // Initial calculation
+    calculateCoordinates();
+
+    // Recalculate on resize
+    window.addEventListener('resize', calculateCoordinates);
+    
+    return () => window.removeEventListener('resize', calculateCoordinates);
+  }, [leftCount, rightCount, leftStackRef, rightStackRef]);
 
   const isValidConnection = (start: CirclePosition, end: CirclePosition) => {
     return (
@@ -145,11 +148,7 @@ export const ComparisonLines: React.FC<ComparisonLinesProps> = ({
     
     e.stopPropagation();
     setIsDragging(true);
-    setDragStart({
-      x: x,
-      y: y,
-      position: position
-    });
+    setDragStart({ x, y, position });
   };
 
   const handleCircleClick = (position: CirclePosition, x: number, y: number, e: React.MouseEvent) => {
@@ -158,7 +157,6 @@ export const ComparisonLines: React.FC<ComparisonLinesProps> = ({
     e.stopPropagation();
 
     if (selectedCircle) {
-      // Second click
       if (isValidConnection(selectedCircle, position)) {
         setDrawnLines(prev => [...prev, { start: selectedCircle, end: position }]);
         setClickedCircles(prev => {
@@ -171,7 +169,6 @@ export const ComparisonLines: React.FC<ComparisonLinesProps> = ({
       setSelectedCircle(null);
       setMousePos(null);
     } else if (!isDragging) {
-      // First click
       setSelectedCircle(position);
       setMousePos({ x, y });
     }
@@ -197,21 +194,21 @@ export const ComparisonLines: React.FC<ComparisonLinesProps> = ({
   // Function to get coordinates for a position
   const getCoordinates = (position: CirclePosition): [number, number] => {
     switch (position) {
-      case 'leftTop': return [relativeLeftX, relativeLeftTopY];
-      case 'rightTop': return [relativeRightX, relativeRightTopY];
-      case 'leftBottom': return [relativeLeftX, relativeLeftBottomY];
-      case 'rightBottom': return [relativeRightX, relativeRightBottomY];
+      case 'leftTop': return [coordinates.leftX, coordinates.leftTopY];
+      case 'rightTop': return [coordinates.rightX, coordinates.rightTopY];
+      case 'leftBottom': return [coordinates.leftX, coordinates.leftBottomY];
+      case 'rightBottom': return [coordinates.rightX, coordinates.rightBottomY];
     }
   };
 
-  // Function to render a circle with consistent styling
-  const renderCircle = (cx: number, cy: number, position: CirclePosition) => {
+  // Function to render a circle
+  const renderCircle = (position: CirclePosition) => {
+    const [cx, cy] = getCoordinates(position);
     const isSelected = selectedCircle === position;
     const isClicked = clickedCircles.has(position);
 
     return (
       <g key={position}>
-        {/* Outer circle */}
         <circle
           cx={cx}
           cy={cy}
@@ -227,7 +224,6 @@ export const ComparisonLines: React.FC<ComparisonLinesProps> = ({
           onClick={(e) => lineMode === 'draw' && !isClicked && handleCircleClick(position, cx, cy, e)}
           pointerEvents={lineMode === 'draw' && !isClicked ? 'all' : 'none'}
         />
-        {/* Inner dot */}
         <circle
           cx={cx}
           cy={cy}
@@ -240,7 +236,6 @@ export const ComparisonLines: React.FC<ComparisonLinesProps> = ({
     );
   };
 
-
   return (
     <svg
       className="absolute inset-0 block-container-svg pointer-events-none"
@@ -250,23 +245,23 @@ export const ComparisonLines: React.FC<ComparisonLinesProps> = ({
         zIndex: 10 
       }}
     >
-      {/* Lines only shown in 'show' mode */}
+      {/* Show mode lines */}
       {lineMode === 'show' && (
         <>
           <line
-            x1={relativeLeftX}
-            y1={relativeLeftTopY}
-            x2={relativeRightX}
-            y2={relativeRightTopY}
+            x1={coordinates.leftX}
+            y1={coordinates.leftTopY}
+            x2={coordinates.rightX}
+            y2={coordinates.rightTopY}
             stroke="rgb(14 165 233)"
             strokeWidth="2"
             className="transition-all duration-300 ease-in-out"
           />
           <line
-            x1={relativeLeftX}
-            y1={relativeLeftBottomY}
-            x2={relativeRightX}
-            y2={relativeRightBottomY}
+            x1={coordinates.leftX}
+            y1={coordinates.leftBottomY}
+            x2={coordinates.rightX}
+            y2={coordinates.rightBottomY}
             stroke="rgb(14 165 233)"
             strokeWidth="2"
             className="transition-all duration-300 ease-in-out"
@@ -274,8 +269,8 @@ export const ComparisonLines: React.FC<ComparisonLinesProps> = ({
         </>
       )}
 
-            {/* Draw mode completed lines */}
-            {lineMode === 'draw' && drawnLines.map((line, index) => {
+      {/* Draw mode completed lines */}
+      {lineMode === 'draw' && drawnLines.map((line, index) => {
         const [x1, y1] = getCoordinates(line.start);
         const [x2, y2] = getCoordinates(line.end);
         return (
@@ -292,7 +287,7 @@ export const ComparisonLines: React.FC<ComparisonLinesProps> = ({
         );
       })}
 
-            {/* Temporary drag line */}
+      {/* Temporary drag line */}
       {(isDragging || selectedCircle) && mousePos && (
         <line
           x1={isDragging ? dragStart!.x : getCoordinates(selectedCircle!)[0]}
@@ -306,11 +301,11 @@ export const ComparisonLines: React.FC<ComparisonLinesProps> = ({
         />
       )}
 
-      {/* Circles */}
-      {renderCircle(relativeLeftX, relativeLeftTopY, 'leftTop')}
-      {renderCircle(relativeRightX, relativeRightTopY, 'rightTop')}
-      {renderCircle(relativeLeftX, relativeLeftBottomY, 'leftBottom')}
-      {renderCircle(relativeRightX, relativeRightBottomY, 'rightBottom')}
+      {/* Render all circles */}
+      {renderCircle('leftTop')}
+      {renderCircle('rightTop')}
+      {renderCircle('leftBottom')}
+      {renderCircle('rightBottom')}
     </svg>
   );
 };

@@ -19,7 +19,7 @@ export const Dispenser: React.FC<DispenserProps> = ({ isDispensing, onAnimationC
     }, [isDispensing]);
 
     return (
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-16 h-28 mb-66">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-16 h-28">
             <div className="absolute inset-x-0 bottom-0 border-2 border-t-0 border-orange-400 rounded-b-lg overflow-hidden h-[90%]" />
             
             <div className="absolute inset-x-2">

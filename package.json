@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "elevenlabs": "^1.50.2",
     "lucide-react": "^0.473.0",
     "motion": "^11.18.1",
     "next": "^15.1.5",

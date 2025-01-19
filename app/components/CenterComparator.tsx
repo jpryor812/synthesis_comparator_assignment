@@ -4,8 +4,8 @@ import { motion } from 'framer-motion';
 interface CenterComparatorProps {
   leftCount: number;
   rightCount: number;
-  leftStackRef: React.RefObject<HTMLDivElement>;
-  rightStackRef: React.RefObject<HTMLDivElement>;
+  leftStackRef: React.RefObject<HTMLDivElement | null>;
+  rightStackRef: React.RefObject<HTMLDivElement | null>;
   onCorrectAnswer: () => void;
   onIncorrectAnswer: () => void;
 }
@@ -53,7 +53,7 @@ const CenterComparator: React.FC<CenterComparatorProps> = ({
   };
 
   return (
-    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center gap-4 z-10">
+    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center gap-2 z-10">
       {/* Left number */}
       <motion.div 
         animate={{

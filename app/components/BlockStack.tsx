@@ -89,7 +89,7 @@ export const BlockStack: React.FC<BlockStackProps> = ({
   onClick={onAddBlock}
   disabled={count >= 10}
   isFull={count >= 10}
-  className={`absolute top-16 ${side === 'left' ? '-right-24' : '-left-24'}`}
+  className={`absolute top-16 ${side === 'left' ? 'right-24' : 'left-24'}`}
 />
 
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-[40%]">

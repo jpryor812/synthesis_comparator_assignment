@@ -32,7 +32,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({ onNumberChange, currentBloc
   };
 
   return (
-    <div className="bg-purple-500 rounded-xl p-3.5 w-48 shadow-xl">
+    <div className="bg-purple-500 rounded-xl p-3.5 w-44 shadow-xl">
       {/* Display */}
       <div className="bg-white border-2 border-orange-400 rounded-lg p-3 mb-3">
         <div className="text-blue-400 text-2xl font-mono text-right">
