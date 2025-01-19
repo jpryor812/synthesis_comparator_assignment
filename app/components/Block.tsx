@@ -12,7 +12,6 @@ interface BlockProps {
 }
 
 export const Block: React.FC<BlockProps> = ({ 
-    index, 
     isNew = false, 
     onAnimationComplete,
     onRemove,

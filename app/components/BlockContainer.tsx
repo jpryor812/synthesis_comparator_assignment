@@ -1,9 +1,6 @@
 'use client';
 
 import React, { useState, useCallback, useRef } from 'react';
-import { AnimatePresence } from 'framer-motion';
-import { Block } from './Block';
-import { Dispenser } from './Dispenser';
 import { useSound } from '../hooks/useSound';
 import ControlPanel from './ControlPanel';
 import LineToggle from './LineToggle';
@@ -69,8 +66,8 @@ const BlockContainer = () => {
       const { [key]: _, ...rest } = prev;
       return rest;
     });
-    playStackSound(parseInt(key.split('-')[1]));
-  };
+    playStackSound(Number(key?.split('-')?.[1] ?? 0));
+};
 
   const removeBlock = useCallback((side: Side, index: number, shouldUpdateCount = true) => {
     const key = `${side}-${index}`;
@@ -109,47 +106,47 @@ const BlockContainer = () => {
     const currentCount = side === 'left' ? leftCount : rightCount;
     
     if (newCount > currentCount) {
-      // Add multiple blocks sequentially
-      const blocksToAdd = newCount - currentCount;
-      let added = 0;
-      
-      const addNextBlock = () => {
-        if (added < blocksToAdd) {
-          addBlock(side);
-          added++;
-          setTimeout(addNextBlock, 200); // Delay between each block
-        }
-      };
-      
-      addNextBlock();
+        // Adding blocks (keep this part the same)
+        const blocksToAdd = newCount - currentCount;
+        let added = 0;
+        
+        const addNextBlock = () => {
+            if (added < blocksToAdd) {
+                addBlock(side);
+                added++;
+                setTimeout(addNextBlock, 200);
+            }
+        };
+        
+        addNextBlock();
     } else if (newCount < currentCount) {
-        // Remove blocks sequentially with immediate count update
-        const blocksToRemove = currentCount - newCount;
+        // Remove blocks sequentially
+        const removeBlocksSequentially = (remainingBlocks: number) => {
+            if (remainingBlocks > newCount) {
+                // Update count first
+                if (side === 'left') {
+                    setLeftCount(remainingBlocks - 1);
+                } else {
+                    setRightCount(remainingBlocks - 1);
+                }
+                
+                // Then trigger block removal animation
+                removeBlock(side, remainingBlocks - 1, false);
+                
+                setTimeout(() => {
+                    removeBlocksSequentially(remainingBlocks - 1);
+                }, 300);
+            }
+        };
         
-        // Update the count immediately
-        if (side === 'left') {
-          setLeftCount(newCount);
-        } else {
-          setRightCount(newCount);
-        }
-        
-        // Then animate the removals
-        for (let i = 0; i < blocksToRemove; i++) {
-          const indexToRemove = currentCount - 1 - i;
-          setTimeout(() => {
-            removeBlock(side, indexToRemove, false); // Pass false to prevent additional count updates
-          }, i * 200); // Stagger the removals
-        }
-      }
-  }, [leftCount, rightCount, addBlock, removeBlock]);
+        removeBlocksSequentially(currentCount);
+    }
+}, [leftCount, rightCount, addBlock, removeBlock]);
 
   return (
     <div className="max-w-7xl mx-auto flex flex-col h-screen overflow-hidden">
-              {showTutorial && (
-        <TutorialInstructions 
-          onComplete={() => setShowTutorial(false)}
-        />
-      )}
+
+      
     <div className="flex justify-between items-stretch gap-4 relative">
       {/* Add CenterComparator here */}
       <CenterComparator 

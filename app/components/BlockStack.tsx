@@ -5,7 +5,7 @@ import { Block } from './Block';
 import { AnimatePresence, motion } from 'framer-motion';
 import { type BlockKey } from './BlockContainer';
 import { AddButton } from './AddButton';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 
 interface BlockStackProps {
   side: 'left' | 'right';

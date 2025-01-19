@@ -82,13 +82,13 @@ const TutorialInstructions: React.FC<TutorialInstructionsProps> = ({ onComplete 
           'xi-api-key': apiKey,
         },
         body: JSON.stringify({
-            text: speechText,  // Add instruction to ignore parentheses
+            text: speechText,  
             model_id: 'eleven_monolingual_v1',
             voice_settings: {
-            stability: 0.9,  // Makes the voice more consistent
-            similarity_boost: 0.9,  // Keeps the voice more natural
-            speaking_rate: .95, // Slightly faster for children's engagement
-            pitch: 1.1 // Slightly higher pitch for a teacher-like voice
+            stability: 0.9,  
+            similarity_boost: 0.9,  
+            speaking_rate: .95, 
+            pitch: 1.1 
           }
         }),
       });
@@ -107,7 +107,6 @@ const TutorialInstructions: React.FC<TutorialInstructionsProps> = ({ onComplete 
 
       const audioBlob = await response.blob();
       
-      // Clean up previous audio URL
       if (audioUrlRef.current) {
         URL.revokeObjectURL(audioUrlRef.current);
       }
@@ -132,12 +131,10 @@ const TutorialInstructions: React.FC<TutorialInstructionsProps> = ({ onComplete 
     }
   };
 
-  // Initial audio generation
   useEffect(() => {
     generateSpeech(instructions[0].text);
 
     return () => {
-      // Cleanup
       if (audioRef.current) {
         audioRef.current.pause();
       }
@@ -147,7 +144,6 @@ const TutorialInstructions: React.FC<TutorialInstructionsProps> = ({ onComplete 
     };
   }, []);
 
-  // Handle step changes
   useEffect(() => {
     if (currentStep > 0) {
       generateSpeech(instructions[currentStep].text);
@@ -201,7 +197,7 @@ const TutorialInstructions: React.FC<TutorialInstructionsProps> = ({ onComplete 
         <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-32 rounded-full border-4 border-blue-500 animate-pulse pointer-events-none" 
              style={{
                boxShadow: '0 0 0 4px rgba(59, 130, 246, 0.3)',
-               transform: 'translate(-50%, -80%)'  // Adjust these values to position the circle
+               transform: 'translate(-50%, -80%)'  
              }}
         />
       )}

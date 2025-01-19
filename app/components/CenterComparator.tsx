@@ -13,8 +13,6 @@ interface CenterComparatorProps {
 const CenterComparator: React.FC<CenterComparatorProps> = ({
   leftCount,
   rightCount,
-  leftStackRef,
-  rightStackRef,
   onCorrectAnswer,
   onIncorrectAnswer
 }) => {
@@ -38,22 +36,41 @@ const CenterComparator: React.FC<CenterComparatorProps> = ({
     if (correct) {
       setIsCorrect(true);
       onCorrectAnswer();
-      // Reset both the local state and trigger the parent reset
       setTimeout(() => {
         setIsCorrect(null);
       }, 1000);
     } else {
       setIsCorrect(false);
       onIncorrectAnswer();
-      // Reset both the local state and trigger the parent reset
       setTimeout(() => {
         setIsCorrect(null);
-      }, 500);
+      }, 1000);
     }
   };
 
   return (
     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center gap-2 z-10">
+    {isCorrect === true && (
+      <motion.div
+        initial={{ scale: 0, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0, opacity: 0 }}
+        className="absolute bg-green-500 text-white text-6xl font-bold p-4 rounded-lg shadow-lg"
+      >
+        Correct!
+      </motion.div>
+    )}
+    {isCorrect === false && (
+      <motion.div
+        initial={{ scale: 0, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0, opacity: 0 }}
+        className="absolute bg-yellow-500 text-white text-center text-6xl font-bold p-4 rounded-lg shadow-lg"
+      >
+        Not Quite!
+      </motion.div>
+    )}
+
       {/* Left number */}
       <motion.div 
         animate={{
