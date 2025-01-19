@@ -37,20 +37,17 @@ export const BlockStack: React.FC<BlockStackProps> = ({
   const [shouldBounce, setShouldBounce] = useState(false);
   const [lastActivityTime, setLastActivityTime] = useState(Date.now());
 
-  // Ensure the ref is set before any animations start
   const containerRef = (node: HTMLDivElement | null) => {
     if (stackRef && typeof stackRef === 'object') {
       stackRef.current = node;
     }
   };
 
-  // Reset timer when there's activity
   useEffect(() => {
     setShouldBounce(false);
     setLastActivityTime(Date.now());
   }, [count, isDispensing, Object.keys(newBlockIndices).length, Object.keys(poppingBlocks).length]);
 
-  // Start bounce animation after 2 seconds of inactivity
   useEffect(() => {
     const timer = setTimeout(() => {
       if (Date.now() - lastActivityTime >= 2000) {
@@ -61,7 +58,6 @@ export const BlockStack: React.FC<BlockStackProps> = ({
     return () => clearTimeout(timer);
   }, [lastActivityTime]);
 
-  // Bounce animation variants
   const bounceVariants = {
     bounce: {
       y: [0, 8, 0],

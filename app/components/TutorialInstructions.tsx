@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ChevronRight, ArrowRight, Volume2, VolumeX, Loader2 } from 'lucide-react';
+import { ChevronRight, Volume2, VolumeX, Loader2 } from 'lucide-react';
 
 interface TutorialInstructionsProps {
   onComplete: () => void;
