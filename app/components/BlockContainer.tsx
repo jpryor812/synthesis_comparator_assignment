@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useCallback, useRef } from 'react';
-import dynamic from 'next/dynamic';
 import { useSound } from '../hooks/useSound';
 import ControlPanel from './ControlPanel';
 import LineToggle from './LineToggle';
